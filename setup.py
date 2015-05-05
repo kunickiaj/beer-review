@@ -3,7 +3,7 @@ CLI for managing your JIRA / Gerrit / git workflow.
 """
 from setuptools import find_packages, setup
 
-dependencies = ['click', 'jira', 'pycrypto']
+dependencies = ['click', 'jira', 'pycrypto', 'ConfigParser', 'gitpython']
 
 setup(
     name='beer-review',
