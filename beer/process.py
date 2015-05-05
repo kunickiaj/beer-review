@@ -3,6 +3,7 @@ import click
 import ConfigParser
 import logging
 from jira.client import JIRA
+from git import RemoteProgress
 import re
 
 # create logger
@@ -21,6 +22,11 @@ ch.setFormatter(formatter)
 
 # add ch to logger
 logger.addHandler(ch)
+
+
+class MyProgressPrinter(RemoteProgress):
+    def update(self, op_code, cur_count, max_count=None, message=''):
+        print(op_code, cur_count, max_count, cur_count / (max_count or 100.0), message or "NO MESSAGE")
 
 
 class Brewery:
@@ -77,6 +83,22 @@ class Brewery:
             self._repo.index.commit('%s. %s' % (issue_id, issue.fields.summary))
         else:
             self._repo.heads[issue_id].checkout()
+
+    def post_review(self, draft=False, reviewers=None, target_branch='master'):
+        ref = 'drafts' if draft else 'for'
+        origin = self._repo.remote('origin')
+        refspec = 'HEAD:refs/%s/%s' % (ref, target_branch)
+        if reviewers is not None:
+            refspec = '%s%%r=%s' % (refspec, reviewers)
+        res = origin.push(refspec=refspec)
+        if len(res) != 1:
+            click.echo('Failed to execute git push to post review.')
+        else:
+            push_info = res[0]
+            if push_info.flags & push_info.ERROR != 0:
+                click.echo('Failed to post review because %s' % push_info.summary)
+            else:
+                click.echo('Pushed review for %s. Draft=[%s]' % (self._repo.active_branch.name, draft))
 
     def _get_project_key(self):
         head_commit = self._repo.head.commit
