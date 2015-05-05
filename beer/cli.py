@@ -9,15 +9,16 @@ pass_brewery = click.make_pass_decorator(Brewery)
 
 @click.group()
 @click.option('--config', '-c', default=os.path.expanduser('~/.config/beer-review/beer-review.conf'))
+@click.option('--session', '-s', default=os.path.expanduser('~/.config/beer-review/jira-session.pickle'))
 @click.pass_context
-def main(ctx, config):
+def main(ctx, config, session):
     """CLI for managing your JIRA / Gerrit / git workflow."""
     try:
         repo = git.Repo(os.path.curdir)
     except git.InvalidGitRepositoryError as e:
         click.echo('Current directory is not a git repo!')
         return -1
-    ctx.obj = Brewery(config_file_path=config, repo=repo)
+    ctx.obj = Brewery(config_file_path=config, session_file_path=session, repo=repo)
 
 
 @main.command('brew',
@@ -25,7 +26,7 @@ def main(ctx, config):
 @click.argument('issue_id', required=False, default=None)
 @click.option('--issue-type', '-t', default='Bug', type=click.Choice(['Bug', 'New Feature', 'Task', 'Improvement']))
 @click.option('--summary', '-s', default=None)
-@click.option('--description', '-d', default=None)
+@click.option('--description', '-d', default=None, required=False)
 @pass_brewery
 def init_jira(ctx, issue_id, issue_type, summary, description):
     description = summary if description is None else description

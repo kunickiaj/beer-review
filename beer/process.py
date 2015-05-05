@@ -3,8 +3,9 @@ import click
 import ConfigParser
 import logging
 from jira.client import JIRA
-from git import RemoteProgress
 import re
+import cPickle as pickle
+import os
 
 # create logger
 logger = logging.getLogger(__name__)
@@ -24,21 +25,30 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 
-class MyProgressPrinter(RemoteProgress):
-    def update(self, op_code, cur_count, max_count=None, message=''):
-        print(op_code, cur_count, max_count, cur_count / (max_count or 100.0), message or "NO MESSAGE")
-
-
 class Brewery:
     """Workflow Wrapper"""
 
-    def __init__(self, config_file_path, repo=None):
+    def __init__(self, config_file_path, session_file_path, repo=None):
         self._jira = None
         self._repo = repo
-        if config_file_path is not None:
-            self._read_config(config_file_path)
 
-    def _read_config(self, config_file_path):
+        if os.path.isfile(session_file_path):
+            with open(session_file_path, 'rb') as session_file:
+                session = pickle.load(session_file)
+        else:
+            session = None
+
+        if config_file_path is not None:
+            self._read_config(config_file_path, session)
+
+        if session is not None:
+            session.max_retries = 3
+            self._jira._session = session
+        else:
+            with open(session_file_path, 'wb') as session_file:
+                pickle.dump(self._jira._session, session_file)
+
+    def _read_config(self, config_file_path, session):
         config = ConfigParser.ConfigParser()
         config.read(config_file_path)
 
@@ -49,13 +59,13 @@ class Brewery:
         # Will terminate if missing configs.
         Brewery._have_required_configs(config)
 
-        # Get JIRA params
-        self._jira = JIRA(
-            server=config.get('JIRA', 'server'),
-            basic_auth=(config.get('JIRA', 'username'), config.get('JIRA', 'password'))
-        )
-
-        self._projects = self._jira.projects()
+        if session is not None:
+            self._jira = JIRA(server=config.get('JIRA', 'server'))
+        else:
+            self._jira = JIRA(
+                server=config.get('JIRA', 'server'),
+                basic_auth=(config.get('JIRA', 'username'), config.get('JIRA', 'password'))
+            )
 
     def work_on(self, issue_id=None, issue_type='Bug', summary=None, description=None):
         if issue_id is not None:
@@ -118,5 +128,5 @@ class Brewery:
         config.get('Gerrit', 'url')
 
     def list_projects(self):
-        for project in self._projects:
+        for project in self._jira.projects():
             click.echo('%s - %s' % (project.key, project.name))
