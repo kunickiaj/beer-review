@@ -1,10 +1,27 @@
+# -*- coding: utf-8 -*-
 import click
+from jira.client import JIRA
 
+pass_api = click.make_pass_decorator(JIRA)
 
-@click.command()
-@click.option('--as-cowboy', '-c', is_flag=True, help='Greet as a cowboy.')
-@click.argument('name', default='world', required=False)
-def main(name, as_cowboy):
+@click.group()
+@click.option('--user', '-u')
+@click.option('--password', '-p')
+@click.option('--server', '-s')
+@click.pass_context
+def main(ctx, user, password, server):
     """CLI for managing your JIRA / Gerrit / git workflow."""
-    greet = 'Howdy' if as_cowboy else 'Hello'
-    click.echo('{0}, {1}.'.format(greet, name))
+    ctx.obj = JIRA(server=server, basic_auth=(user, password))
+
+
+@main.group('project')
+def project():
+    """Commands for the project resource."""
+
+
+@project.command('list')
+@pass_api
+def project_list(ctx):
+    """Lists available projects."""
+    click.echo(ctx.projects())
+
