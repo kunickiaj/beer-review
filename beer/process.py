@@ -6,6 +6,8 @@ from jira.client import JIRA
 import re
 import cPickle as pickle
 import os
+import subprocess
+import urlparse
 
 # create logger
 logger = logging.getLogger(__name__)
@@ -29,6 +31,7 @@ class Brewery:
     """Workflow Wrapper"""
 
     def __init__(self, config_file_path, session_file_path, repo=None):
+        self._gerrit_url = None
         self._jira = None
         self._repo = repo
 
@@ -58,6 +61,8 @@ class Brewery:
 
         # Will terminate if missing configs.
         Brewery._have_required_configs(config)
+
+        self._gerrit_url = urlparse.urlparse(config.get('Gerrit', 'url'), 'ssh')
 
         if session is not None:
             self._jira = JIRA(server=config.get('JIRA', 'server'))
@@ -109,6 +114,23 @@ class Brewery:
                 click.echo('Failed to post review because %s' % push_info.summary)
             else:
                 click.echo('Pushed review for %s. Draft=[%s]' % (self._repo.active_branch.name, draft))
+
+    def submit(self):
+        commit_sha = self._repo.active_branch.commit.hexsha
+        cmd = [
+            'ssh',
+            '-p',
+            self._gerrit_url.port,
+            '%s@%s' % (self._gerrit_url.username, self._gerrit_url.hostname),
+            'gerrit',
+            'review',
+            '--submit',
+            commit_sha
+        ]
+        try:
+            subprocess.check_call(cmd)
+        except Exception as e:
+            click.echo('Failed to merge review: %s' % e.message)
 
     def _get_project_key(self):
         head_commit = self._repo.head.commit
