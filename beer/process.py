@@ -104,7 +104,7 @@ class Brewery:
         origin = self._repo.remote('origin')
         refspec = 'HEAD:refs/%s/%s' % (ref, target_branch)
         if reviewers is not None:
-            refspec = '%s%%r=%s' % (refspec, reviewers)
+            refspec = '%s%%r=%s' % (refspec, ",r=".join(reviewers.split(",")))
         res = origin.push(refspec=refspec)
         if len(res) != 1:
             click.echo('Failed to execute git push to post review.')
