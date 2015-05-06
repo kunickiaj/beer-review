@@ -117,6 +117,7 @@ class Brewery:
 
     def submit(self):
         commit_sha = self._repo.active_branch.commit.hexsha
+        issue_id = self._repo.active_branch.name
         cmd = [
             'ssh',
             '-p',
@@ -129,6 +130,12 @@ class Brewery:
         ]
         try:
             subprocess.check_call(cmd)
+
+            transitions = self._jira.transitions(issue_id)
+            # If not already in progress, transition it.
+            for transition in transitions:
+                if 'Fixed' in transition['name']:
+                    self._jira.transition_issue(issue_id, transition['id'])
         except Exception as e:
             click.echo('Failed to merge review: %s' % e.message)
 
