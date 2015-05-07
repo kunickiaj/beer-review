@@ -121,7 +121,7 @@ class Brewery:
         cmd = [
             'ssh',
             '-p',
-            self._gerrit_url.port,
+            str(self._gerrit_url.port),
             '%s@%s' % (self._gerrit_url.username, self._gerrit_url.hostname),
             'gerrit',
             'review',
