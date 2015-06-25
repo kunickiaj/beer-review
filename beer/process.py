@@ -140,13 +140,17 @@ class Brewery:
             click.echo('Failed to merge review: %s' % e.message)
 
     def _get_project_key(self):
-        head_commit = self._repo.head.commit
-        # No match returns None
-        match = re.search('^([a-zA-Z]{3})(-[0-9]+)', head_commit.message)
-        if match is not None:
-            return match.group(1)
-        else:
-            return None
+        max_tries = 5
+        ref = 0
+        while ref < max_tries:
+            commit = self._repo.commit("HEAD~%s" % ref)
+            ref += 1
+            # No match returns None
+            match = re.search('^([a-zA-Z]{3})(-[0-9]+)', commit.message)
+            if match is not None:
+                return match.group(1)
+
+        return None
 
     @staticmethod
     def _have_required_configs(config):
