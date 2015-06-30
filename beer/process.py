@@ -4,6 +4,7 @@ import ConfigParser
 import logging
 from jira.client import JIRA
 import re
+from requests.cookies import RequestsCookieJar
 import cPickle as pickle
 import os
 import subprocess
@@ -26,6 +27,14 @@ ch.setFormatter(formatter)
 # add ch to logger
 logger.addHandler(ch)
 
+class ObliviousCookieJar(RequestsCookieJar):
+    def set_cookie(self, *args, **kwargs):
+        """Simply ignore any request to set a cookie."""
+        pass
+
+    def copy(self):
+        """Make sure to return an instance of the correct class on copying."""
+        return ObliviousCookieJar()
 
 class Brewery:
     """Workflow Wrapper"""
@@ -46,6 +55,7 @@ class Brewery:
 
         if session is not None:
             session.max_retries = 3
+            session.cookies = ObliviousCookieJar()
             self._jira._session = session
         else:
             with open(session_file_path, 'wb') as session_file:
@@ -71,6 +81,8 @@ class Brewery:
                 server=config.get('JIRA', 'server'),
                 basic_auth=(config.get('JIRA', 'username'), config.get('JIRA', 'password'))
             )
+
+        self._jira._session = ObliviousCookieJar()
 
     def work_on(self, issue_id=None, issue_type='Bug', summary=None, description=None):
         if issue_id is not None:
