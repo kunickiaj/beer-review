@@ -2,7 +2,6 @@
 
 CLI for managing your JIRA / Gerrit / git workflow.
 
-
 # Installation
 
 If you don't use `pipsi`, you're missing out.
