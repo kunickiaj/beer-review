@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1ae5cdf2_d9e9f71b",
+        "filename": "README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1006239
+      },
+      "writtenOn": "2015-09-14T21:58:57Z",
+      "side": 1,
+      "message": "there are two extra periods to remove.",
+      "revId": "214dd19b51f571e3cd0130b9d40572f1d5387897",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
