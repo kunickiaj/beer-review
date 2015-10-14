@@ -1,0 +1,6 @@
+click
+jira
+pycrypto
+ConfigParser
+gitpython
+
