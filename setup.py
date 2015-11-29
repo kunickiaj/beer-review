@@ -7,7 +7,7 @@ dependencies = ['click', 'jira', 'pycrypto', 'ConfigParser', 'gitpython']
 
 setup(
     name='beer-review',
-    version='0.1.6',
+    version='0.1.7',
     url='https://github.com/kunickiaj/beer-review',
     license='MIT',
     author='Adam Kunicki',
