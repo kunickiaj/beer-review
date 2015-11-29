@@ -27,6 +27,7 @@ ch.setFormatter(formatter)
 # add ch to logger
 logger.addHandler(ch)
 
+
 class ObliviousCookieJar(RequestsCookieJar):
     def set_cookie(self, *args, **kwargs):
         """Simply ignore any request to set a cookie."""
@@ -35,6 +36,7 @@ class ObliviousCookieJar(RequestsCookieJar):
     def copy(self):
         """Make sure to return an instance of the correct class on copying."""
         return ObliviousCookieJar()
+
 
 class Brewery:
     """Workflow Wrapper"""
@@ -84,14 +86,30 @@ class Brewery:
 
         self._jira._session = ObliviousCookieJar()
 
-    def work_on(self, issue_id=None, issue_type='Bug', summary=None, description=None):
+    def work_on(
+            self,
+            project_key=None,
+            issue_id=None,
+            issue_type='Bug',
+            summary=None,
+            description=None,
+            doc_impact=True
+    ):
+        if not project_key:
+            project_key = self._get_project_key()
+        if doc_impact:
+            doc_impact = 'Yes'
+        else:
+            doc_impact = 'No'
+
         if issue_id is not None:
             issue = self._jira.issue(issue_id)
         else:
             issue = self._jira.create_issue(
-                project={'key': self._get_project_key()},
+                project={'key': project_key},
                 summary=summary,
                 description=description,
+                customfield_10400={'value': doc_impact},
                 issuetype={'name': issue_type}
             )
 
