@@ -1,6 +1,6 @@
 click
 jira
 pycrypto
-ConfigParser
+configparser
 gitpython
 

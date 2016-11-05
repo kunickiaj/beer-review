@@ -60,5 +60,3 @@ def project():
 def project_list(brewery):
     """Lists available projects."""
     brewery.list_projects()
-
-

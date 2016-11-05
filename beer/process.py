@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import click
-import ConfigParser
+import configparser
 import logging
 from jira.client import JIRA
 import re
 from requests.cookies import RequestsCookieJar
-import cPickle as pickle
+import _pickle as pickle
 import os
 import subprocess
-import urlparse
+import urllib.parse
 
 # create logger
 logger = logging.getLogger(__name__)
@@ -26,17 +26,6 @@ ch.setFormatter(formatter)
 
 # add ch to logger
 logger.addHandler(ch)
-
-
-class ObliviousCookieJar(RequestsCookieJar):
-    def set_cookie(self, *args, **kwargs):
-        """Simply ignore any request to set a cookie."""
-        pass
-
-    def copy(self):
-        """Make sure to return an instance of the correct class on copying."""
-        return ObliviousCookieJar()
-
 
 class Brewery:
     """Workflow Wrapper"""
@@ -57,14 +46,13 @@ class Brewery:
 
         if session is not None:
             session.max_retries = 3
-            session.cookies = ObliviousCookieJar()
             self._jira._session = session
         else:
             with open(session_file_path, 'wb') as session_file:
                 pickle.dump(self._jira._session, session_file)
 
     def _read_config(self, config_file_path, session):
-        config = ConfigParser.ConfigParser()
+        config = configparser.ConfigParser()
         config.read(config_file_path)
 
         if len(config.sections()) == 0:
@@ -74,7 +62,7 @@ class Brewery:
         # Will terminate if missing configs.
         Brewery._have_required_configs(config)
 
-        self._gerrit_url = urlparse.urlparse(config.get('Gerrit', 'url'), 'ssh')
+        self._gerrit_url = urllib.parse.urlparse(config.get('Gerrit', 'url'), 'ssh')
 
         if session is not None:
             self._jira = JIRA(server=config.get('JIRA', 'server'))
@@ -83,8 +71,6 @@ class Brewery:
                 server=config.get('JIRA', 'server'),
                 basic_auth=(config.get('JIRA', 'username'), config.get('JIRA', 'password'))
             )
-
-        self._jira._session = ObliviousCookieJar()
 
     def work_on(
             self,
