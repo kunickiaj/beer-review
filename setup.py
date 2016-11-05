@@ -3,11 +3,11 @@ CLI for managing your JIRA / Gerrit / git workflow.
 """
 from setuptools import find_packages, setup
 
-dependencies = ['click', 'jira', 'pycrypto', 'ConfigParser', 'gitpython']
+dependencies = ['click', 'jira', 'pycrypto', 'configparser', 'gitpython']
 
 setup(
     name='beer-review',
-    version='0.1.7',
+    version='0.2.0',
     url='https://github.com/kunickiaj/beer-review',
     license='MIT',
     author='Adam Kunicki',
@@ -41,8 +41,8 @@ setup(
         'Operating System :: Unix',
         # 'Operating System :: Windows',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        # 'Programming Language :: Python :: 3',
+        # 'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 3',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ]
 )
