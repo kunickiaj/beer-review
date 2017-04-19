@@ -27,6 +27,7 @@ ch.setFormatter(formatter)
 # add ch to logger
 logger.addHandler(ch)
 
+
 class Brewery:
     """Workflow Wrapper"""
 
@@ -79,6 +80,7 @@ class Brewery:
             issue_type='Bug',
             summary=None,
             description=None,
+            testing_status='Not Required',
             doc_impact=True
     ):
         if not project_key:
@@ -96,6 +98,7 @@ class Brewery:
                 summary=summary,
                 description=description,
                 customfield_10400={'value': doc_impact},
+                customfield_10810={'value': testing_status},
                 issuetype={'name': issue_type}
             )
 

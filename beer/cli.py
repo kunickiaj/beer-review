@@ -28,11 +28,12 @@ def main(brewery, config, session):
 @click.option('--summary', '-s', default=None)
 @click.option('--description', '-d', default=None, required=False)
 @click.option('--doc-impact', '-x', is_flag=True)
+@click.option('--testing-status', '-q', default='Not Required', type=click.Choice(['Not Required', 'Required']))
 @click.option('--project-key', '-p', default=None, required=False)
 @pass_beer
-def init_jira(brewery, project_key, issue_id, issue_type, summary, description, doc_impact):
+def init_jira(brewery, project_key, issue_id, issue_type, summary, description, testing_status, doc_impact):
     description = summary if description is None else description
-    brewery.work_on(project_key, issue_id, issue_type, summary, description, doc_impact)
+    brewery.work_on(project_key, issue_id, issue_type, summary, description, testing_status, doc_impact)
 
 
 @main.command('taste', help='Post a review or draft to Gerrit.')
